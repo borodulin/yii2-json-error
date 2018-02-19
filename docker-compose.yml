@@ -1,0 +1,29 @@
+version: '3'
+services:
+  php:
+    image: borodulin/php:7.0
+    volumes:
+      - ./:/app
+    depends_on:
+      - db
+  php-patched:
+    image: borodulin/php:7.0
+    volumes:
+      - ./:/app
+      - ./patch/JsonExpression.php:/app/vendor/yiisoft/yii2/db/JsonExpression.php:ro
+    depends_on:
+      - db
+  db:
+    image: postgres
+    environment:
+      POSTGRES_DB: yii2
+      POSTGRES_USER: yii2
+      POSTGRES_PASSWORD: yii2
+    volumes:
+#      - /var/data/camunda/postgres:/var/lib/postgresql/data
+      - ./initdb:/docker-entrypoint-initdb.d/
+    healthcheck:
+        test: ["CMD-SHELL", "pg_isready -U yii2"]
+        interval: 5s
+        timeout: 30s
+        retries: 3
